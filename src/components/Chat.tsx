@@ -168,10 +168,10 @@ const Chat: React.FC = () => {
     initThread();
   }, []);
   
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  // Auto-scroll disabled
+  // useEffect(() => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // }, [messages]);
   
   // Handle sending a new message
   const handleSendMessage = async (e: React.FormEvent) => {
