@@ -11,9 +11,9 @@ interface Message {
 
 // Styled Components
 const ChatContainer = styled.div`
-  width: 100%;
-  max-width: 600px;
+  width: calc(100% - 40px);
   margin: 0 auto;
+  padding: 0;
   display: flex;
   flex-direction: column;
   height: 80vh;
@@ -23,7 +23,7 @@ const ChatContainer = styled.div`
 `;
 
 const ChatHeader = styled.div`
-  background-color: #f1c40f;
+  background-color: #FFEC19;
   color: #1a1a1a;
   padding: 15px 20px;
   border-radius: 0px;
@@ -31,6 +31,8 @@ const ChatHeader = styled.div`
   font-size: 18px;
   display: flex;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 const BotAvatar = styled.div`
@@ -43,7 +45,7 @@ const BotAvatar = styled.div`
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  color: #f1c40f;
+  color: #FFEC19;
 `;
 
 const MessagesContainer = styled.div`
@@ -62,7 +64,7 @@ const MessageBubble = styled.div<{ sender: 'user' | 'bot' }>`
   border-radius: 0px;
   margin-bottom: 10px;
   align-self: ${props => props.sender === 'user' ? 'flex-end' : 'flex-start'};
-  background-color: ${props => props.sender === 'user' ? '#f1c40f' : '#333'};
+  background-color: ${props => props.sender === 'user' ? '#FFEC19' : '#333'};
   color: ${props => props.sender === 'user' ? '#1a1a1a' : '#fff'};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 `;
@@ -85,12 +87,12 @@ const MessageInput = styled.input`
   background-color: #333;
   color: #fff;
   &:focus {
-    border-color: #f1c40f;
+    border-color: #FFEC19;
   }
 `;
 
 const SendButton = styled.button`
-  background-color: #f1c40f;
+  background-color: #FFEC19;
   color: #1a1a1a;
   border: none;
   border-radius: 0px;
@@ -104,7 +106,7 @@ const SendButton = styled.button`
   transition: background-color 0.2s;
   
   &:hover {
-    background-color: #f39c12;
+    background-color: #e8d917;
   }
   
   &:disabled {
@@ -126,7 +128,7 @@ const TypingDot = styled.div`
   width: 8px;
   height: 8px;
   margin: 0 1px;
-  background-color: #f1c40f;
+  background-color: #FFEC19;
   border-radius: 0px;
   animation: typing 1.4s infinite both;
   

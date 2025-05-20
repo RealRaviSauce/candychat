@@ -16,13 +16,13 @@ const AppContainer = styled.div`
 
 const ApiKeyWarning = styled.div`
   background-color: #333;
-  color: #f1c40f;
+  color: #FFEC19;
   padding: 10px 15px;
   border-radius: 0px;
   margin-bottom: 20px;
   max-width: 600px;
   text-align: center;
-  border: 1px solid #f1c40f;
+  border: 1px solid #FFEC19;
 `;
 
 function App() {
