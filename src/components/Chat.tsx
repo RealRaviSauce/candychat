@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { createThread, sendMessageToAssistant } from '../services/openai';
+import { saveChatMessage } from '../services/supabase';
 
 // Message type definition
 interface Message {
@@ -153,13 +154,16 @@ const Chat: React.FC = () => {
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [threadId, setThreadId] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Initialize the OpenAI thread
   useEffect(() => {
     const initThread = async () => {
       try {
-        await createThread();
+        const newThreadId = await createThread();
+        setThreadId(newThreadId);
       } catch (error) {
         console.error('Failed to initialize chat thread:', error);
       }
@@ -202,6 +206,20 @@ const Chat: React.FC = () => {
       };
       
       setMessages(prev => [...prev, botMessage]);
+      
+      // Check if the message contains an email (simple check, you might want to improve this)
+      if (newMessage.includes('@') && !userEmail) {
+        const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
+        const match = newMessage.match(emailRegex);
+        if (match && match[0]) {
+          setUserEmail(match[0]);
+        }
+      }
+      
+      // Save message to Supabase
+      if (threadId) {
+        await saveChatMessage(threadId, newMessage, response, userEmail);
+      }
     } catch (error) {
       console.error('Error getting response from assistant:', error);
       // Add error message
