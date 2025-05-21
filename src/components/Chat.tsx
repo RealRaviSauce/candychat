@@ -216,9 +216,14 @@ const Chat: React.FC = () => {
         }
       }
       
-      // Save message to Supabase
-      if (threadId) {
-        await saveChatMessage(threadId, newMessage, response, userEmail);
+      // Save message to Supabase (wrapped in try/catch to prevent UI errors)
+      try {
+        if (threadId) {
+          await saveChatMessage(threadId, newMessage, response, userEmail);
+        }
+      } catch (saveError) {
+        console.error('Failed to save to Supabase:', saveError);
+        // Continue UI flow even if saving fails
       }
     } catch (error) {
       console.error('Error getting response from assistant:', error);

@@ -1,9 +1,9 @@
 import OpenAI from 'openai';
 import config from '../config';
 
-// Initialize the OpenAI client
+// Initialize the OpenAI client with error handling
 const openai = new OpenAI({
-  apiKey: config.openAI.apiKey,
+  apiKey: config.openAI.apiKey || 'dummy-key-for-init',
   dangerouslyAllowBrowser: true // Allow API key usage in browser - in production, use a backend proxy
 });
 
@@ -13,18 +13,31 @@ let threadId: string | null = null;
 // Initialize a new conversation thread
 export const createThread = async () => {
   try {
+    // Check if API key is configured
+    if (!config.openAI.apiKey || config.openAI.apiKey === 'dummy-key-for-init') {
+      console.warn('OpenAI API key not configured');
+      return 'local-' + Date.now(); // Return a local placeholder ID
+    }
+    
     const thread = await openai.beta.threads.create();
     threadId = thread.id;
     return thread.id;
   } catch (error) {
     console.error('Error creating thread:', error);
-    throw error;
+    // Instead of throwing error, return a local ID so UI doesn't break
+    return 'error-' + Date.now();
   }
 };
 
 // Send a message to the assistant and get the response
 export const sendMessageToAssistant = async (message: string): Promise<string> => {
   try {
+    // Check if API key is configured
+    if (!config.openAI.apiKey || config.openAI.apiKey === 'dummy-key-for-init') {
+      console.warn('OpenAI API key not configured, returning mock response');
+      return "This is a mock response because the OpenAI API key is not configured. Please set up the API key to get real responses.";
+    }
+    
     // Create a thread if one doesn't exist yet
     if (!threadId) {
       await createThread();
