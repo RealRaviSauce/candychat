@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .results {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #FFEC19;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin-top: 30px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Supabase Connection Test</h1>
+  
+  <div>
+    <h2>Connection Settings</h2>
+    <label for="supabase-url">Supabase URL:</label>
+    <input type="text" id="supabase-url" placeholder="https://your-project-id.supabase.co">
+    
+    <label for="supabase-key">Supabase Anon Key:</label>
+    <input type="text" id="supabase-key" placeholder="your-supabase-anon-key">
+  </div>
+  
+  <div>
+    <h2>Test Connection</h2>
+    <button id="test-connection">Test Connection</button>
+  </div>
+  
+  <div>
+    <h2>Insert Test Message</h2>
+    <label for="thread-id">Thread ID:</label>
+    <input type="text" id="thread-id" value="test-thread-1">
+    
+    <label for="user-message">User Message:</label>
+    <input type="text" id="user-message" value="This is a test user message">
+    
+    <label for="bot-response">Bot Response:</label>
+    <input type="text" id="bot-response" value="This is a test bot response">
+    
+    <label for="email">Email:</label>
+    <input type="email" id="email" value="test@example.com">
+    
+    <button id="insert-message">Insert Test Message</button>
+  </div>
+  
+  <div>
+    <h2>Query Messages</h2>
+    <button id="query-messages">Query Messages</button>
+  </div>
+  
+  <div class="results" id="results">Results will appear here...</div>
+  
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // Elements
+    const supabaseUrlInput = document.getElementById('supabase-url');
+    const supabaseKeyInput = document.getElementById('supabase-key');
+    const testConnectionBtn = document.getElementById('test-connection');
+    const threadIdInput = document.getElementById('thread-id');
+    const userMessageInput = document.getElementById('user-message');
+    const botResponseInput = document.getElementById('bot-response');
+    const emailInput = document.getElementById('email');
+    const insertMessageBtn = document.getElementById('insert-message');
+    const queryMessagesBtn = document.getElementById('query-messages');
+    const resultsDiv = document.getElementById('results');
+    
+    // Get client
+    function getClient() {
+      const url = supabaseUrlInput.value.trim();
+      const key = supabaseKeyInput.value.trim();
+      
+      if (!url || !key) {
+        log('Please enter Supabase URL and Anon Key');
+        return null;
+      }
+      
+      return supabase.createClient(url, key);
+    }
+    
+    // Log to results
+    function log(message, object = null) {
+      if (object) {
+        resultsDiv.textContent += `${message}\n${JSON.stringify(object, null, 2)}\n\n`;
+      } else {
+        resultsDiv.textContent += `${message}\n\n`;
+      }
+    }
+    
+    // Clear logs
+    function clearLog() {
+      resultsDiv.textContent = '';
+    }
+    
+    // Test connection
+    testConnectionBtn.addEventListener('click', async () => {
+      clearLog();
+      log('Testing connection...');
+      
+      const client = getClient();
+      if (!client) return;
+      
+      try {
+        const { data, error } = await client
+          .from('chat_logs')
+          .select('count(*)', { count: 'exact', head: true });
+          
+        if (error) {
+          log('Connection test failed:', error);
+        } else {
+          log('Connection successful!', data);
+        }
+      } catch (err) {
+        log('Error testing connection:', err);
+      }
+    });
+    
+    // Insert test message
+    insertMessageBtn.addEventListener('click', async () => {
+      clearLog();
+      log('Inserting test message...');
+      
+      const client = getClient();
+      if (!client) return;
+      
+      try {
+        const { data, error } = await client
+          .from('chat_logs')
+          .insert([
+            {
+              thread_id: threadIdInput.value,
+              user_message: userMessageInput.value,
+              assistant_response: botResponseInput.value,
+              email: emailInput.value
+            }
+          ]);
+          
+        if (error) {
+          log('Insert failed:', error);
+        } else {
+          log('Message inserted successfully!', data);
+        }
+      } catch (err) {
+        log('Error inserting message:', err);
+      }
+    });
+    
+    // Query messages
+    queryMessagesBtn.addEventListener('click', async () => {
+      clearLog();
+      log('Querying messages...');
+      
+      const client = getClient();
+      if (!client) return;
+      
+      try {
+        const { data, error } = await client
+          .from('chat_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
+          
+        if (error) {
+          log('Query failed:', error);
+        } else {
+          log(`Found ${data.length} messages:`, data);
+        }
+      } catch (err) {
+        log('Error querying messages:', err);
+      }
+    });
+    
+    // Try to read from localStorage on page load
+    try {
+      const savedUrl = localStorage.getItem('supabase-url');
+      const savedKey = localStorage.getItem('supabase-key');
+      
+      if (savedUrl) supabaseUrlInput.value = savedUrl;
+      if (savedKey) supabaseKeyInput.value = savedKey;
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+    
+    // Save values to localStorage when changed
+    [supabaseUrlInput, supabaseKeyInput].forEach(input => {
+      input.addEventListener('change', () => {
+        try {
+          localStorage.setItem('supabase-url', supabaseUrlInput.value);
+          localStorage.setItem('supabase-key', supabaseKeyInput.value);
+        } catch (e) {
+          // Ignore localStorage errors
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

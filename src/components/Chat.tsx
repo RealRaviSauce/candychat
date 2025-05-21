@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { createThread, sendMessageToAssistant } from '../services/openai';
 import { saveChatMessage } from '../services/supabase';
+import { testSupabaseConnection, debugSaveChatMessage } from '../services/supabase-debug';
 
 // Message type definition
 interface Message {
@@ -158,18 +159,25 @@ const Chat: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Initialize the OpenAI thread
+  // Initialize the OpenAI thread and test Supabase connection
   useEffect(() => {
-    const initThread = async () => {
+    const init = async () => {
       try {
+        // Test Supabase connection
+        console.log('Testing Supabase connection on component mount...');
+        const connected = await testSupabaseConnection();
+        console.log('Supabase connection test result:', connected);
+        
+        // Create thread
         const newThreadId = await createThread();
         setThreadId(newThreadId);
+        console.log('Thread created with ID:', newThreadId);
       } catch (error) {
-        console.error('Failed to initialize chat thread:', error);
+        console.error('Failed during initialization:', error);
       }
     };
     
-    initThread();
+    init();
   }, []);
   
   // Auto-scroll disabled
@@ -216,10 +224,18 @@ const Chat: React.FC = () => {
         }
       }
       
-      // Save message to Supabase (wrapped in try/catch to prevent UI errors)
+      // Save message to Supabase with debug info
       try {
+        console.log('About to save chat message to Supabase...');
+        console.log('Thread ID:', threadId);
+        console.log('Email detected:', userEmail);
+        
         if (threadId) {
-          await saveChatMessage(threadId, newMessage, response, userEmail);
+          // Use the debug version for more logging
+          const result = await debugSaveChatMessage(threadId, newMessage, response, userEmail);
+          console.log('Supabase save result:', result);
+        } else {
+          console.warn('No thread ID available, skipping message save');
         }
       } catch (saveError) {
         console.error('Failed to save to Supabase:', saveError);
