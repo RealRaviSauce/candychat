@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { createThread, sendMessageToAssistant } from '../services/openai';
-import { saveChatMessage } from '../services/supabase';
 import { testSupabaseConnection, debugSaveChatMessage } from '../services/supabase-debug';
 
 // Message type definition
